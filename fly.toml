@@ -1,0 +1,39 @@
+# DailyFriend document anonymiser on Fly.io, London.
+#
+# Stateless: no volume, no database. Documents exist only in memory while a
+# request is being handled. The one secret is MISTRAL_API_KEY:
+#   fly secrets set MISTRAL_API_KEY=...
+
+app = 'dailyfriend-anonymiser'
+primary_region = 'lhr'
+
+[env]
+  NODE_ENV = 'production'
+  PORT = '8080'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # Suspend when idle and wake on the next visit (about a second). Billed only
+  # while running. Safe here because nothing runs in the background: a job
+  # always has an open request, and Fly never suspends a machine mid-request.
+  auto_stop_machines = 'suspend'
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [http_service.concurrency]
+    type = 'requests'
+    soft_limit = 20
+    hard_limit = 30
+
+  [[http_service.checks]]
+    grace_period = '15s'
+    interval = '30s'
+    method = 'GET'
+    path = '/api/health'
+    timeout = '5s'
+
+[[vm]]
+  # OCR of a scanned page and PDF rendering peak at a few hundred MB.
+  size = 'shared-cpu-1x'
+  memory = '1gb'
