@@ -226,19 +226,8 @@ function Intro({ onFile }: { onFile: (f: File) => void }) {
         }}
       />
 
-      <ul className="mt-8 grid gap-3 sm:grid-cols-3 text-sm">
-        <Point title="Same file back">
-          Your layout stays as it was. PDFs and images get black boxes; Word files get labels like [Person 1].
-        </Point>
-        <Point title="Really removed">
-          The text under each black box is deleted, so an AI tool cannot read it either.
-        </Point>
-        <Point title="Nothing kept">
-          Your file is processed in memory and never saved. It is not used to train AI.
-        </Point>
-      </ul>
-
-      <HowItWorks />
+      <Accuracy />
+      <WhySafe />
     </div>
   );
 }
@@ -252,30 +241,57 @@ function Point({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function HowItWorks() {
+function WhySafe() {
   return (
-    <details className="mt-8 rounded-xl bg-white border border-line p-4 text-sm group">
-      <summary className="cursor-pointer font-semibold">How your document is handled</summary>
-      <div className="mt-3 space-y-2 text-muted">
-        <p>
-          Your file is sent over an encrypted connection to our server in London. It is held in memory while
-          it is processed and discarded straight after. Nothing is written to disk or kept in a database.
-        </p>
-        <p>
-          To find personal details, the text of your document is checked by Mistral AI in the EU (Paris).
-          Mistral does not use it to train its models. Scanned pages and photos are read on our own server.
-        </p>
-        <p>
-          You then choose what to remove. We remove it, check the finished file again, and only hand it back
-          if nothing you chose is left in it.
-        </p>
-        <p>
-          No tool catches everything. Faces, signatures, handwriting and details that identify someone through
-          context (for example, &ldquo;the only resident with a guide dog&rdquo;) can slip through. Always
-          read the result before you use it.
-        </p>
-      </div>
-    </details>
+    <section className="mt-10" aria-labelledby="why-safe">
+      <h2 id="why-safe" className="text-xl font-bold tracking-tight">
+        Why it is safe to use
+      </h2>
+      <ul className="mt-4 grid gap-3 sm:grid-cols-2 text-sm">
+        <Point title="Nothing is kept">
+          Your file is held in memory while it is processed and deleted straight after. There is no database
+          and no copy on disk.
+        </Point>
+        <Point title="Stays in the UK and EU">
+          Our server is in London. To find personal details, the text is checked by Mistral AI in Paris. Your
+          document is never sent to the US.
+        </Point>
+        <Point title="Not used to train AI">
+          We use Mistral&rsquo;s paid service, which does not train its models on what you send. Scanned pages
+          and photos are read on our own server.
+        </Point>
+        <Point title="Really removed, not just hidden">
+          The text under each black box is deleted, so an AI tool cannot read it either. Hidden details go
+          too: author names, comments, tracked changes, file properties and photo location data.
+        </Point>
+        <Point title="Checked twice">
+          Before you get your file back, we read it again. If anything you chose to remove is still there, we
+          do not hand it over.
+        </Point>
+        <Point title="You stay in control">
+          You see everything we found and choose what goes. No account, no email address, no cookies, no
+          tracking. The code is{' '}
+          <a className="underline hover:text-ink" href={SOURCE_URL} target="_blank" rel="noreferrer">
+            open for anyone to check
+          </a>
+          .
+        </Point>
+      </ul>
+    </section>
+  );
+}
+
+function Accuracy() {
+  return (
+    <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <p className="font-semibold">Very accurate, but not a guarantee</p>
+      <p className="mt-1">
+        In our tests it caught every name, address and ID number, and it should catch almost everything in your
+        documents too. But no automatic tool is perfect, so always read the result before you share it or use
+        it with AI. Faces, signatures, handwriting, and details that point to someone through context
+        (&ldquo;the only resident with a guide dog&rdquo;) may not be caught.
+      </p>
+    </div>
   );
 }
 
