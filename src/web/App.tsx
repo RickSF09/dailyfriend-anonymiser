@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   LIMITS,
   type DocMeta,
@@ -7,6 +7,21 @@ import {
   type Stage,
   type StreamEvent,
 } from '../shared/types';
+import {
+  ArrowRight,
+  BrainCircuit,
+  Code2,
+  Download,
+  EyeOff,
+  FileUp,
+  Gauge,
+  ListChecks,
+  MapPin,
+  ShieldCheck,
+  Trash2,
+  UploadCloud,
+  UserX,
+} from 'lucide-react';
 import { base64ToBlob, detect, redact } from './client';
 import logoUrl from './assets/logo.svg';
 
@@ -181,10 +196,9 @@ function Intro({ onFile }: { onFile: (f: File) => void }) {
       <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
         Remove personal details from a document
       </h1>
-      <p className="mt-3 text-lg text-muted max-w-2xl">
-        Upload a care plan, letter or form. We find names, addresses, phone numbers, NHS numbers and other
-        identifying details, you check the list, and you get the same file back with those details removed.
-      </p>
+      <p className="mt-3 text-lg text-muted">Same file back, without the names, addresses and numbers.</p>
+
+      <BeforeAfter />
 
       <button
         type="button"
@@ -200,17 +214,28 @@ function Intro({ onFile }: { onFile: (f: File) => void }) {
           const f = e.dataTransfer.files[0];
           if (f) onFile(f);
         }}
-        className={`mt-8 w-full rounded-2xl border-2 border-dashed px-6 py-12 text-center transition-colors ${
+        className={`mt-6 w-full rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
           over
             ? 'border-brand bg-brand-soft'
             : 'border-line bg-white hover:border-brand hover:bg-brand-soft/50'
         }`}
       >
-        <span className="block text-lg font-semibold text-brand">Choose a file</span>
-        <span className="mt-1 block text-muted">or drag it here</span>
-        <span className="mt-4 block text-sm text-muted">
-          PDF, Word (.docx) or a photo (PNG, JPG) · up to {LIMITS.maxBytes / 1024 / 1024} MB and{' '}
-          {LIMITS.maxPages} pages
+        <UploadCloud className="mx-auto size-10 text-brand" aria-hidden="true" />
+        <span className="mt-2 block text-lg font-semibold text-brand">Choose a file</span>
+        <span className="block text-muted">or drag it here</span>
+        <span className="mt-4 flex flex-wrap justify-center gap-2 text-xs text-muted">
+          {[
+            'PDF',
+            'Word',
+            'JPG',
+            'PNG',
+            `${LIMITS.maxBytes / 1024 / 1024} MB`,
+            `${LIMITS.maxPages} pages`,
+          ].map((t) => (
+            <span key={t} className="rounded-full bg-paper border border-line px-2 py-0.5">
+              {t}
+            </span>
+          ))}
         </span>
       </button>
       <input
@@ -226,20 +251,70 @@ function Intro({ onFile }: { onFile: (f: File) => void }) {
         }}
       />
 
+      <Steps />
       <Accuracy />
       <WhySafe />
     </div>
   );
 }
 
-function Point({ title, children }: { title: string; children: ReactNode }) {
+/** A tiny example of what the tool does, instead of a paragraph about it. */
+function BeforeAfter() {
+  const box = (
+    <span className="inline-block h-3.5 w-20 translate-y-0.5 rounded-sm bg-ink" aria-label="removed" />
+  );
   return (
-    <li className="rounded-xl bg-white border border-line p-4">
-      <span className="block font-semibold text-ink">{title}</span>
-      <span className="mt-1 block text-muted">{children}</span>
-    </li>
+    <div className="mt-6 grid gap-2 sm:grid-cols-[1fr_auto_1fr] sm:items-center text-sm" aria-hidden="true">
+      <div className="rounded-xl bg-white border border-line p-3 font-mono leading-6">
+        <p>
+          Name: <span className="bg-amber-100 px-1 rounded">Margaret Jones</span>
+        </p>
+        <p>
+          Phone: <span className="bg-amber-100 px-1 rounded">07700 900123</span>
+        </p>
+        <p>Needs: help with washing</p>
+      </div>
+      <ArrowRight className="hidden sm:block size-5 text-muted" />
+      <div className="rounded-xl bg-white border border-line p-3 font-mono leading-6">
+        <p>Name: {box}</p>
+        <p>Phone: {box}</p>
+        <p>Needs: help with washing</p>
+      </div>
+    </div>
   );
 }
+
+function Steps() {
+  const steps = [
+    { icon: FileUp, label: 'Upload' },
+    { icon: ListChecks, label: 'Review' },
+    { icon: Download, label: 'Download' },
+  ];
+  return (
+    <ol className="mt-8 flex items-center justify-center gap-2 sm:gap-4 text-sm font-medium">
+      {steps.map(({ icon: Icon, label }, i) => (
+        <li key={label} className="flex items-center gap-2 sm:gap-4">
+          {i > 0 && <ArrowRight className="size-4 text-muted" aria-hidden="true" />}
+          <span className="flex items-center gap-2">
+            <span className="grid size-9 place-items-center rounded-full bg-brand-soft text-brand">
+              <Icon className="size-5" aria-hidden="true" />
+            </span>
+            {label}
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+const SAFETY = [
+  { icon: Trash2, title: 'Nothing stored', text: 'Deleted straight after' },
+  { icon: MapPin, title: 'UK & EU only', text: 'London server, AI in Paris' },
+  { icon: BrainCircuit, title: 'Never trains AI', text: 'Paid Mistral service' },
+  { icon: EyeOff, title: 'Truly removed', text: 'Not just covered up' },
+  { icon: ShieldCheck, title: 'Checked twice', text: 'Re-read before you get it' },
+  { icon: UserX, title: 'No account', text: 'No cookies, no tracking' },
+];
 
 function WhySafe() {
   return (
@@ -247,49 +322,36 @@ function WhySafe() {
       <h2 id="why-safe" className="text-xl font-bold tracking-tight">
         Why it is safe to use
       </h2>
-      <ul className="mt-4 grid gap-3 sm:grid-cols-2 text-sm">
-        <Point title="Nothing is kept">
-          Your file is held in memory while it is processed and deleted straight after. There is no database
-          and no copy on disk.
-        </Point>
-        <Point title="Stays in the UK and EU">
-          Our server is in London. To find personal details, the text is checked by Mistral AI in Paris. Your
-          document is never sent to the US.
-        </Point>
-        <Point title="Not used to train AI">
-          We use Mistral&rsquo;s paid service, which does not train its models on what you send. Scanned pages
-          and photos are read on our own server.
-        </Point>
-        <Point title="Really removed, not just hidden">
-          The text under each black box is deleted, so an AI tool cannot read it either. Hidden details go
-          too: author names, comments, tracked changes, file properties and photo location data.
-        </Point>
-        <Point title="Checked twice">
-          Before you get your file back, we read it again. If anything you chose to remove is still there, we
-          do not hand it over.
-        </Point>
-        <Point title="You stay in control">
-          You see everything we found and choose what goes. No account, no email address, no cookies, no
-          tracking. The code is{' '}
-          <a className="underline hover:text-ink" href={SOURCE_URL} target="_blank" rel="noreferrer">
-            open for anyone to check
-          </a>
-          .
-        </Point>
+      <ul className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {SAFETY.map(({ icon: Icon, title, text }) => (
+          <li key={title} className="rounded-xl bg-white border border-line p-4">
+            <span className="grid size-10 place-items-center rounded-full bg-leaf-soft text-green-700">
+              <Icon className="size-5" aria-hidden="true" />
+            </span>
+            <span className="mt-3 block font-semibold">{title}</span>
+            <span className="block text-sm text-muted">{text}</span>
+          </li>
+        ))}
       </ul>
+      <a
+        className="mt-3 inline-flex items-center gap-1 text-sm text-muted underline hover:text-ink"
+        href={SOURCE_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <Code2 className="size-4" aria-hidden="true" /> Open source: check the code yourself
+      </a>
     </section>
   );
 }
 
 function Accuracy() {
   return (
-    <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-      <p className="font-semibold">Very accurate, but not a guarantee</p>
-      <p className="mt-1">
-        In our tests it caught every name, address and ID number, and it should catch almost everything in your
-        documents too. But no automatic tool is perfect, so always read the result before you share it or use
-        it with AI. Faces, signatures, handwriting, and details that point to someone through context
-        (&ldquo;the only resident with a guide dog&rdquo;) may not be caught.
+    <div className="mt-8 flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <Gauge className="size-6 shrink-0" aria-hidden="true" />
+      <p>
+        <span className="font-semibold">Very accurate, not a guarantee.</span> It catches almost everything,
+        but always give the result a quick read. Faces, signatures and handwriting are not checked.
       </p>
     </div>
   );
